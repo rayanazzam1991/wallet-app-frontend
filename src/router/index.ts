@@ -9,7 +9,8 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: {
-        showHeader: true
+        showHeader: true,
+        middleware: ["auth"]
       }
     },
     {
@@ -31,10 +32,38 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/TransferMoneyView.vue'),
       meta: {
-        showHeader: true
+        showHeader: true,
+        middleware: ["auth"]
       }
     },
   ],
+})
+
+// --- middleware system ---
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+const middlewares: Record<string, Function> = {
+  //@ts-ignore
+  auth: (to, from, next) => {
+    const user = localStorage.getItem("user")
+    console.log("user",user)
+    if(!user) return next("/login")
+
+    const isLoggedIn  = JSON.parse(user)?.token
+    if (!isLoggedIn) return next("/login")
+    next()
+  },
+}
+
+router.beforeEach((to, from, next) => {
+  if (!to.meta.middleware) return next()
+
+  const mws = Array.isArray(to.meta.middleware) ? to.meta.middleware : [to.meta.middleware]
+  for (const mw of mws) {
+    if (middlewares[mw]) {
+      return middlewares[mw](to, from, next)
+    }
+  }
+  next()
 })
 
 export default router
