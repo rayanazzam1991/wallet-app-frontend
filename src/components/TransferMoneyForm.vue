@@ -43,8 +43,6 @@ const form = reactive<TransferMoney>({
   amount: 0
 })
 
-const errors = ref({})
-
 // Zod validation schema
 const transferSchema = z.object({
   receiverId: z.number('Receiver is required'),
@@ -67,10 +65,10 @@ transactionStore.transferMoney(form)
     toast('Login failed', {
       style: {
         color: 'white',
-        background: '#ef4444'
+        background: '#FF5733'
       },
       description: error.message,
-      class:'text-white'
+      descriptionClass:'text-white'
     })
   }
 })

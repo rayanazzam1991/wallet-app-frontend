@@ -21,6 +21,8 @@ export const useAuthStore = defineStore('authStore', ()=>{
   })
 
   async function login(request : LoginPayload) {
+    try {
+      loading.value = true
     const response = await api.post<ApiResponse<AuthUser>>('/auth/login', {
       email: request.email,
       password: request.password,
@@ -28,6 +30,10 @@ export const useAuthStore = defineStore('authStore', ()=>{
     if(response.data){
       setUser(response.data)
     }
+    }finally {
+      loading.value = false
+    }
+
   }
   async function fetchUserData(){
     const response = await api.get<ApiResponse<User>>('/auth/me')
