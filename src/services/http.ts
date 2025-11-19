@@ -1,10 +1,7 @@
-import { toast } from 'vue-sonner'
-import type { ErrorResponse } from '@/types/api.ts'
-
 interface HttpOptions extends RequestInit {
   headers?: Record<string, string>;
+  params?: Record<string, any>;
 }
-
 export class HttpClient {
   private baseUrl: string;
   private readonly getToken: () => string | null;
@@ -12,6 +9,12 @@ export class HttpClient {
   constructor(baseUrl: string, getToken: () => string | null) {
     this.baseUrl = baseUrl;
     this.getToken = getToken;
+  }
+
+  private buildQuery(params?: Record<string, any>) {
+    if (!params) return '';
+    const query = new URLSearchParams(params).toString();
+    return query ? `?${query}` : '';
   }
 
   private buildUrl(path: string) {
@@ -51,7 +54,8 @@ export class HttpClient {
   }
 
   get<T>(path: string, opt?: HttpOptions) {
-    return this.request<T>(path, { ...opt, method: 'GET' });
+    const query = this.buildQuery(opt?.params);
+    return this.request<T>(`${path}${query}`, { ...opt, method: 'GET' });
   }
 
   post<T>(path: string, body?: unknown, opt?: HttpOptions) {

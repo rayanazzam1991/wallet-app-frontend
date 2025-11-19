@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useLocalStorage } from '@vueuse/core'
-import type { AuthUser, LoginPayload } from '@/types/user.ts'
+import type { AuthUser, LoginPayload, User } from '@/types/user.ts'
 import { computed, ref } from 'vue'
 import { useApi } from '@/composable/useApi.ts'
 import type { ApiResponse } from '@/types/api.ts'
@@ -12,7 +12,8 @@ export const useAuthStore = defineStore('authStore', ()=>{
   const {api} = useApi()
   const loading = ref(false)
 
-  const user = useLocalStorage<AuthUser | null>('user', null, {
+  const userData = ref<User | null>(null)
+  const authUser = useLocalStorage<AuthUser | null>('user', null, {
     serializer: {
       read: (v: string) => v ? JSON.parse(v) : null,
       write: (v: AuthUser | null) => JSON.stringify(v)
@@ -28,17 +29,26 @@ export const useAuthStore = defineStore('authStore', ()=>{
       setUser(response.data)
     }
   }
-
+  async function fetchUserData(){
+    const response = await api.get<ApiResponse<User>>('/auth/me')
+    if(response.data){
+      setUserData(response.data)
+    }
+  }
+  const setUserData = (newUser: User | null) => {
+    userData.value = newUser
+  }
   const setUser = (newUser: AuthUser | null) => {
-    user.value = newUser
+    authUser.value = newUser
   }
 
-  const getUser = computed(() => user.value)
-  const isAuthenticated = computed(() => !!user.value?.token)
+  const getAuthUser = computed(() => authUser.value)
+  const getUserData = computed(() => userData.value)
+  const isAuthenticated = computed(() => !!authUser.value?.token)
 
   async function logout() {
-    user.value = null
-    await router.push('/')
+    authUser.value = null
+    await router.push('/login')
   }
 
   return {
@@ -47,6 +57,8 @@ export const useAuthStore = defineStore('authStore', ()=>{
     loading,
     isAuthenticated,
     setUser,
-    getUser,
+    fetchUserData,
+    getAuthUser,
+    getUserData
   }
 })
