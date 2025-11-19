@@ -24,7 +24,9 @@ export const useAuthStore = defineStore('authStore', ()=>{
       email: request.email,
       password: request.password,
     })
-
+    if(response.data){
+      setUser(response.data)
+    }
   }
 
   const setUser = (newUser: AuthUser | null) => {
