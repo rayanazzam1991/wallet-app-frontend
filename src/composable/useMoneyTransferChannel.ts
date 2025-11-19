@@ -1,13 +1,12 @@
-// src/composables/useMoneyTransferChannel.ts
 import { onMounted, onBeforeUnmount } from 'vue';
 import { useEcho } from '@/services/echo'
 import { useAuthStore } from '@/stores/authStore.ts'
-import { useProfileStore } from '@/stores/profileStore.ts'
+import { useUserStore } from '@/stores/userStore.ts'
 import { useTransactionStore } from '@/stores/transactionStore.ts'
 
 export function useMoneyTransferChannel() {
   const authStore = useAuthStore();
-  const profileStore = useProfileStore();
+  const userStore = useUserStore();
   const transactionStore = useTransactionStore();
   const echo = useEcho();
 
@@ -27,7 +26,7 @@ export function useMoneyTransferChannel() {
     channel.listen('.money.transfer.success', async (e: any) => {
       console.log('💸 Money transfer success event:', e);
       // 🔥 IMPORTANT — call store actions on the store instance
-      await profileStore.fetchUserData()
+      await userStore.fetchUserData()
 
       // 🔥 If transactions need a page number, use the store's current page
       if (typeof transactionStore.getPagination?.page !== 'undefined') {

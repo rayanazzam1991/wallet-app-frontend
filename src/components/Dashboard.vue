@@ -6,7 +6,7 @@ import { useTransactionStore } from '@/stores/transactionStore.js'
 import { storeToRefs } from 'pinia'
 import { currencyFormat } from '../utils/currencyFormat.js'
 import type { Transaction } from '@/types/transaction.ts'
-import { useProfileStore } from '@/stores/profileStore.ts'
+import { useUserStore } from '@/stores/userStore.ts'
 import Pusher from 'pusher-js'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useMoneyTransferChannel } from '@/composable/useMoneyTransferChannel.ts'
@@ -14,15 +14,15 @@ import { useMoneyTransferChannel } from '@/composable/useMoneyTransferChannel.ts
 
 const page = ref(1)
 const transactionStore = useTransactionStore()
-const profileStore = useProfileStore()
+const userStore = useUserStore()
 const authStore = useAuthStore()
-const { getUserBalance, getUserData } = storeToRefs(profileStore)
+const { getUserBalance, getUserData } = storeToRefs(userStore)
 
 useMoneyTransferChannel();
 
 const latestTransactions = ref<Transaction[]>([])
 onMounted(async ()=>{
-  await profileStore.fetchUserData()
+  await userStore.fetchUserData()
   await transactionStore.fetchTransactions(page.value)
 
   if (allTransactions.value?.length && latestTransactions.value.length === 0) {

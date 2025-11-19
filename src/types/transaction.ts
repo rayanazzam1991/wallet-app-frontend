@@ -15,3 +15,8 @@ export interface TransactionStat {
   total_sent: number
   total_commission:number,
 }
+
+export interface TransferMoney {
+  receiver_id:number,
+  amount:number,
+}

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { Transaction, TransactionStat } from '@/types/transaction.ts'
+import type { Transaction, TransactionStat, TransferMoney } from '@/types/transaction.ts'
 import { useApi } from '@/composable/useApi.ts'
 import type { ApiResponse, PaginationResponse } from '@/types/api.ts'
 
@@ -21,6 +21,9 @@ export const useTransactionStore = defineStore('transactions', ()=>{
         pagination.value = response.pagination
       }
   }
+  async function transferMoney(request : TransferMoney){
+    await api.post('/transactions',request)
+  }
 
   const getTransactions = computed(()=>transactions.value)
   const getPagination = computed(()=>pagination.value)
@@ -30,6 +33,7 @@ export const useTransactionStore = defineStore('transactions', ()=>{
     pagination,
     getPagination,
     getTransactions,
-    fetchTransactions
+    fetchTransactions,
+    transferMoney
   }
 })

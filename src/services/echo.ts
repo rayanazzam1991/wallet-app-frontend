@@ -1,10 +1,9 @@
-// src/services/echo.ts
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import { useAuthStore } from '@/stores/authStore.ts'
 
 // Required by Echo
-// @ts-ignore
+// @ts-expect-error
 window.Pusher = Pusher;
 // @ts-ignore
 let echo: Echo | null = null;
