@@ -1,3 +1,6 @@
+import { toast } from 'vue-sonner'
+import type { ErrorResponse } from '@/types/api.ts'
+
 interface HttpOptions extends RequestInit {
   headers?: Record<string, string>;
 }
@@ -22,6 +25,7 @@ export class HttpClient {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...(options.headers || {})
     };
 
@@ -32,8 +36,15 @@ export class HttpClient {
     const response = await fetch(url, { ...options, headers });
 
     if (!response.ok) {
-      const message = await response.text();
-      throw new Error(`HTTP ${response.status}: ${message}`);
+      const text = await response.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        json = { message: text };
+      }
+
+      throw json;
     }
 
     return await response.json() as Promise<T>;

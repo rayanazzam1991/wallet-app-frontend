@@ -8,5 +8,6 @@ export function useApi() {
   const token = auth.getUser?.token!
   const api = new HttpClient(API_BASE, () =>token );
 
+
   return { api };
 }

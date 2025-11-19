@@ -13,3 +13,8 @@ export interface User {
   email: string;
   balance: number;
 }
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
