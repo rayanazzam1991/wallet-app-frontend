@@ -7,14 +7,18 @@ import { storeToRefs } from 'pinia'
 import { currencyFormat } from '../utils/currencyFormat.js'
 import type { Transaction } from '@/types/transaction.ts'
 import { useProfileStore } from '@/stores/profileStore.ts'
+import Pusher from 'pusher-js'
+import { useAuthStore } from '@/stores/authStore.ts'
+import { useMoneyTransferChannel } from '@/composable/useMoneyTransferChannel.ts'
 
 
 const page = ref(1)
 const transactionStore = useTransactionStore()
 const profileStore = useProfileStore()
+const authStore = useAuthStore()
+const { getUserBalance, getUserData } = storeToRefs(profileStore)
 
-
-
+useMoneyTransferChannel();
 
 const latestTransactions = ref<Transaction[]>([])
 onMounted(async ()=>{
@@ -26,7 +30,7 @@ onMounted(async ()=>{
   }
 })
 const {getTransactions : allTransactions,getPagination } = storeToRefs(transactionStore)
-const {getUserBalance} = storeToRefs(profileStore)
+
 
 watch(()=>page.value,
   async (newPage)=>{
