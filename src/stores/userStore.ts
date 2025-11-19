@@ -12,7 +12,6 @@ export const useUserStore = defineStore('userStore', ()=>{
 
   const profile = ref<User | null>(null)
 
-  const users = ref<User[]>()
   const receivers = ref<User[]>()
 
   async function fetchReceivers(){
@@ -36,8 +35,14 @@ export const useUserStore = defineStore('userStore', ()=>{
   const getReceivers = computed(() => receivers.value)
   const getUserBalance = computed(() =>  profile.value?.balance)
 
+  const getUserInitials = computed(() => {
+    if (!profile.value?.name) return 'U'
+    return profile.value.name.split(' ').map(n => n[0]).join('').toUpperCase()
+  })
+
   return {
     loading,
+    getUserInitials,
     fetchReceivers,
     getReceivers,
     fetchUserData,

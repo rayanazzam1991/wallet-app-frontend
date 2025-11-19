@@ -3,58 +3,215 @@ import { useAuthStore } from '@/stores/authStore.ts'
 import { storeToRefs } from 'pinia'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger
+} from '@/components/ui/sheet'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Menu, LogOut, User, Wallet, Send } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { useUserStore } from '@/stores/userStore.ts'
 
 const authStore = useAuthStore()
-const {isAuthenticated,getUser} = storeToRefs(authStore)
-const {logout} = authStore
+const { isAuthenticated  } = storeToRefs(authStore)
+const { logout } = authStore
 
+const userStore = useUserStore()
+const {getUserInitials,getUserData} = storeToRefs(userStore)
 const router = useRouter()
-const gotoLoginPage = async ()=>{
+const gotoLoginPage = async () => {
   await router.push('/login')
+}
+
+
+
+const isScrolled = ref(false)
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 10
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('scroll', handleScroll)
 }
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-
+  <header
+    class="sticky top-0 z-50 w-full border-b transition-all duration-300 ease-out"
+    :class="[
+      isScrolled
+        ? 'bg-background/95 backdrop-blur-xl border-border/40 shadow-sm'
+        : 'bg-background/80 backdrop-blur-lg border-border/20'
+    ]"
+  >
     <div class="container mx-auto px-4 sm:px-6">
       <div class="flex h-16 items-center justify-between">
+        <!-- Logo & Navigation -->
         <div class="flex items-center gap-8">
-          <nav class="hidden md:flex items-center gap-6">
-            <RouterLink to="/" class="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors duration-200 relative group">
-              My Wallet
-              <div class="absolute -bottom-6 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></div>
+          <!-- Logo -->
+          <RouterLink
+            to="/"
+            class="flex items-center gap-2 group"
+          >
+            <div class="relative">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
+                <Wallet class="w-4 h-4 text-white" />
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+            </div>
+            <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Wallety
+            </span>
+          </RouterLink>
+
+          <!-- Desktop Navigation -->
+          <nav class="hidden lg:flex items-center gap-1">
+            <RouterLink
+              to="/"
+              class="relative px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-slate-900 transition-all duration-200 group"
+            >
+              <div class="flex items-center gap-2">
+                <Wallet class="w-4 h-4" />
+                <span>My Wallet</span>
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300"></div>
             </RouterLink>
-            <RouterLink to="/transfer" class="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors duration-200 relative group">
-              Transfer Money
-              <div class="absolute -bottom-6 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></div>
+
+            <RouterLink
+              to="/transfer"
+              class="relative px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-slate-900 transition-all duration-200 group"
+            >
+              <div class="flex items-center gap-2">
+                <Send class="w-4 h-4" />
+                <span>Transfer Money</span>
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300"></div>
             </RouterLink>
           </nav>
         </div>
 
-        <div class="flex items-center gap-3">
-
-          <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors duration-200 cursor-pointer group">
-              <div v-if="isAuthenticated">
-              <div  class="hidden sm:block">
-                <div class="flex items-center gap-1">
-                  <span class="text-sm font-medium text-slate-800">{{ getUser?.name}}</span>
+        <!-- Mobile Menu -->
+        <div class="flex lg:hidden">
+          <Sheet>
+            <SheetTrigger as-child>
+              <Button variant="ghost" size="sm" class="h-9 w-9 p-0">
+                <Menu class="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" class="w-[280px] sm:w-[350px]">
+              <div class="flex flex-col gap-6 mt-8">
+                <div class="flex items-center gap-3 pb-4 border-b">
+                  <Avatar class="w-10 h-10">
+                    <AvatarFallback
+                      v-if="isAuthenticated"
+                      class="bg-gradient-to-br from-blue-500 to-purple-500 text-white"
+                    >
+                      {{ getUserInitials }}
+                    </AvatarFallback>
+                    <AvatarFallback v-else class="bg-slate-100">
+                      <User class="w-4 h-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div class="flex flex-col">
+                    <Badge v-if="isAuthenticated" variant="secondary" class="w-fit text-xs">
+                      Admin
+                    </Badge>
                   </div>
-                <span class="text-xs text-slate-500">Admin</span>
-              <Button
-                @click="logout"
-                class="flex items-center gap-1">Logout</Button>
-              </div>
-              </div>
-              <div v-else class="hidden sm:block">
-                <div class="flex items-center gap-1">
+                </div>
+
+                <nav class="flex flex-col gap-2">
+                  <RouterLink
+                    to="/"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors duration-200"
+                  >
+                    <Wallet class="w-4 h-4" />
+                    My Wallet
+                  </RouterLink>
+                  <RouterLink
+                    to="/transfer"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors duration-200"
+                  >
+                    <Send class="w-4 h-4" />
+                    Transfer Money
+                  </RouterLink>
+                </nav>
+
+                <div class="pt-4 border-t">
                   <Button
+                    v-if="isAuthenticated"
+                    @click="logout"
+                    variant="outline"
+                    class="w-full justify-start gap-2"
+                  >
+                    <LogOut class="w-4 h-4" />
+                    Logout
+                  </Button>
+                  <Button
+                    v-else
                     @click="gotoLoginPage"
-                    class="text-sm font-medium text-white">Login</Button>
+                    class="w-full justify-start gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    <User class="w-4 h-4" />
+                    Login
+                  </Button>
                 </div>
               </div>
-            </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        <!-- Desktop User Menu -->
+        <div class="hidden lg:flex items-center gap-3">
+          <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+            <DropdownMenu v-if="isAuthenticated">
+              <DropdownMenuTrigger as-child>
+                <Button variant="ghost" class="relative h-9 px-3 rounded-lg hover:bg-slate-100 transition-colors duration-200 group">
+                  <div class="flex items-center gap-3">
+                    <Avatar class="w-8 h-8">
+                      <AvatarFallback class="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-sm group-hover:scale-110 transition-transform duration-200">
+                        {{ getUserInitials }}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div class="flex flex-col items-start">
+                      <Badge variant="secondary" class="text-xs h-5">
+                        Admin
+                      </Badge>
+                    </div>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent class="w-56" align="end">
+                <DropdownMenuLabel class="flex flex-col">
+                  <span class="text-sm font-medium">{{ getUserData?.name }}</span>
+                  <span class="text-xs text-slate-500 font-normal">Administrator</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem @click="logout" class="text-red-600 cursor-pointer">
+                  <LogOut class="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              v-else
+              @click="gotoLoginPage"
+              class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <User class="w-4 h-4 mr-2" />
+              Login
+            </Button>
           </div>
         </div>
       </div>
@@ -63,32 +220,57 @@ const gotoLoginPage = async ()=>{
 </template>
 
 <style scoped>
-/* Smooth transitions for header elements */
-header {
-  transition: all 0.3s ease;
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
-/* Custom scrollbar for mobile navigation */
-nav::-webkit-scrollbar {
-  display: none;
-}
-
-nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Animation for header load */
-.header-load {
+/* Custom gradient animation for header */
+header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(59 130 246 / 0.4), transparent);
   opacity: 0;
-  transform: translateY(-10px);
-  animation: headerSlideIn 0.6s ease forwards;
+  transition: opacity 0.3s ease;
 }
 
-@keyframes headerSlideIn {
+header:hover::before {
+  opacity: 1;
+}
+
+/* Mobile menu animations */
+:deep(.sheet-content) {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Dropdown menu animations */
+:deep(.dropdown-menu-content) {
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 </style>
