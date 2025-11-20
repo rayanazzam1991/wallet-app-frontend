@@ -1,54 +1,97 @@
-# wallet-app-frontend
+# Wallet App Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+A Vue 3 + Vite single-page application for managing wallet balances, transferring money, and viewing transaction history. It uses Pinia for state management, Vue Router for navigation, Tailwind CSS for styling, and Sonner for toast notifications.
 
-## Recommended IDE Setup
+## Features
+- **Authentication-aware routing:** Vue Router guards redirect unauthenticated users away from protected pages like the dashboard and transfer flow.
+- **Dashboard overview:** Displays the current wallet balance and paginated transaction history with loading states and badge indicators for sent/received transfers.
+- **Money transfer form:** Guided transfer experience with validation powered by `vee-validate` and `zod`.
+- **Real-time updates:** Pusher/Laravel Echo channel wiring keeps transaction data in sync without manual refreshes.
+- **Reusable UI primitives:** Card, Button, Badge, and iconography components to keep the interface consistent.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Technology Stack
+- [Vue 3](https://vuejs.org/) with the Composition API
+- [Vite](https://vitejs.dev/) for dev server and bundling
+- [Pinia](https://pinia.vuejs.org/) for state management
+- [Vue Router](https://router.vuejs.org/) for navigation and route guards
+- [Tailwind CSS](https://tailwindcss.com/) (with animate and merge utilities)
+- [vee-validate](https://vee-validate.logaretm.com/) + [zod](https://zod.dev/) for form validation
+- [Laravel Echo](https://laravel.com/docs/broadcasting#client-installation) + [Pusher](https://pusher.com/) for realtime updates
+- [Vitest](https://vitest.dev/) for unit testing
+- [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/) for linting/formatting
 
-## Recommended Browser Setup
+## Prerequisites
+- Node.js \(>=20.19.0\)
+- [pnpm](https://pnpm.io/) (project is pinned via `packageManager`)
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Environment Variables
+Create a `.env` file (or `.env.local` for overrides) in the project root before running the app:
 
-## Type Support for `.vue` Imports in TS
+```bash
+VITE_API_BASE_URL=https://api.example.com       # Backend base URL used by the HTTP client
+VITE_PUSHER_APP_KEY=your-pusher-key              # Pusher key for realtime updates
+VITE_PUSHER_APP_CLUSTER=eu                       # Pusher cluster
+VITE_BASE_URL=/                                  # Public base path if you deploy under a subdirectory
+```
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Installation
+Install dependencies with pnpm:
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
 pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+## Development
+Start the Vite dev server with hot module reloading:
 
-```sh
+```bash
 pnpm dev
 ```
+The app will be available at the URL printed in the terminal (defaults to `http://localhost:5173`).
 
-### Type-Check, Compile and Minify for Production
+## Production Build & Preview
+Generate an optimized production build:
 
-```sh
+```bash
 pnpm build
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+Preview the production bundle locally (serves the `dist/` directory):
 
-```sh
-pnpm test:unit
+```bash
+pnpm preview
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+You can deploy the contents of `dist/` to any static host (e.g., Nginx, Netlify, Vercel). Ensure the environment variables above are provided through your hosting platform so the app can reach the API and Pusher.
 
-```sh
-pnpm lint
-```
+## Testing and Quality
+- Run unit tests: `pnpm test:unit`
+- Lint and auto-fix: `pnpm lint`
+- Format source files: `pnpm format`
+- Type-check Vue + TypeScript: `pnpm type-check`
+
+## Project Structure
+Key directories to explore:
+- `src/components/` – Dashboard widgets, forms, header, and UI primitives.
+- `src/views/` – Top-level routed pages (dashboard, login, transfer flow).
+- `src/router/` – Route definitions and auth middleware.
+- `src/stores/` – Pinia stores for auth and transactions.
+- `src/composable/` – Reusable logic like API client and realtime channels.
+- `src/services/` – HTTP client and Echo/Pusher setup.
+- `src/utils/` – Helpers such as currency formatting.
+
+## Scripts
+Package.json includes convenience scripts:
+
+| Script | Description |
+| ------ | ----------- |
+| `pnpm dev` | Start the development server. |
+| `pnpm build` | Type-check, then build the production bundle. |
+| `pnpm preview` | Serve the built `dist/` folder locally. |
+| `pnpm test:unit` | Run unit tests with Vitest. |
+| `pnpm lint` | Lint and auto-fix issues. |
+| `pnpm format` | Format source files with Prettier. |
+| `pnpm type-check` | Type-check Vue components with `vue-tsc`. |
+
+## Getting Help
+If you run into issues, verify that your Node and pnpm versions satisfy the requirements and that your environment variables are set correctly. Consult the tooling docs linked above for deeper configuration guidance.
