@@ -6,6 +6,7 @@ export interface Transaction {
   receiver:User,
   type:string,
   amount:number,
+  fees:number
   created_at:string
 }
 

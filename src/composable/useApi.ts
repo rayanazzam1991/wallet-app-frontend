@@ -1,14 +1,21 @@
 import { HttpClient } from '@/services/http';
-import { useAuthStore } from '@/stores/authStore.ts'
 
 export function useApi() {
-  const auth = useAuthStore();
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL;
-  const token = auth.getAuthUser?.token!
-  console.log("toek",token)
-  const api = new HttpClient(API_BASE, () =>token );
 
+  function getTokenFromStorage(): string | null {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw).token;
+    } catch {
+      return null;
+    }
+  }
+
+  const api = new HttpClient(API_BASE, () => getTokenFromStorage());
 
   return { api };
 }

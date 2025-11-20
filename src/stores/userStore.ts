@@ -9,9 +9,6 @@ export const useUserStore = defineStore('userStore', ()=>{
 
   const {api} = useApi()
   const loading = ref(false)
-
-  const profile = ref<User | null>(null)
-
   const receivers = ref<User[]>()
 
   async function fetchReceivers(){
@@ -20,33 +17,11 @@ export const useUserStore = defineStore('userStore', ()=>{
       receivers.value = response.data
     }
   }
-
-  async function fetchUserData(){
-    const response = await api.get<ApiResponse<User>>('/auth/me')
-    if(response.data){
-      setUserData(response.data)
-    }
-  }
-  const setUserData = (newUser: User | null) => {
-    profile.value = newUser
-  }
-
-  const getUserData = computed(() => profile.value)
   const getReceivers = computed(() => receivers.value)
-  const getUserBalance = computed(() =>  profile.value?.balance)
-
-  const getUserInitials = computed(() => {
-    if (!profile.value?.name) return 'U'
-    return profile.value.name.split(' ').map(n => n[0]).join('').toUpperCase()
-  })
 
   return {
     loading,
-    getUserInitials,
     fetchReceivers,
     getReceivers,
-    fetchUserData,
-    getUserData,
-    getUserBalance
   }
 })

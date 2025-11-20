@@ -20,21 +20,15 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Menu, LogOut, User, Wallet, Send } from 'lucide-vue-next'
 import { ref } from 'vue'
-import { useUserStore } from '@/stores/userStore.ts'
 
 const authStore = useAuthStore()
 const { isAuthenticated  } = storeToRefs(authStore)
 const { logout } = authStore
-
-const userStore = useUserStore()
-const {getUserInitials,getUserData} = storeToRefs(userStore)
+const {getUserInitials,getAuthUser} = storeToRefs(authStore)
 const router = useRouter()
 const gotoLoginPage = async () => {
   await router.push('/login')
 }
-
-
-
 const isScrolled = ref(false)
 
 const handleScroll = () => {
@@ -55,10 +49,10 @@ if (typeof window !== 'undefined') {
         : 'bg-background/80 backdrop-blur-lg border-border/20'
     ]"
   >
-    <div class="container mx-auto px-4 sm:px-6">
-      <div class="flex h-16 items-center justify-between">
-        <!-- Logo & Navigation -->
-        <div class="flex items-center gap-8">
+    <div class="w-full px-4 sm:px-6 lg:px-20">
+      <div class="flex w-full h-16 items-center justify-between">
+        <!-- Left Section: Logo & Navigation -->
+        <div class="flex items-center gap-8 flex-1">
           <!-- Logo -->
           <RouterLink
             to="/"
@@ -101,117 +95,120 @@ if (typeof window !== 'undefined') {
           </nav>
         </div>
 
-        <!-- Mobile Menu -->
-        <div class="flex lg:hidden">
-          <Sheet>
-            <SheetTrigger as-child>
-              <Button variant="ghost" size="sm" class="h-9 w-9 p-0">
-                <Menu class="w-5 h-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" class="w-[280px] sm:w-[350px]">
-              <div class="flex flex-col gap-6 mt-8">
-                <div class="flex items-center gap-3 pb-4 border-b">
-                  <Avatar class="w-10 h-10">
-                    <AvatarFallback
-                      v-if="isAuthenticated"
-                      class="bg-gradient-to-br from-blue-500 to-purple-500 text-white"
-                    >
-                      {{ getUserInitials }}
-                    </AvatarFallback>
-                    <AvatarFallback v-else class="bg-slate-100">
-                      <User class="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div class="flex flex-col">
-                    <Badge v-if="isAuthenticated" variant="secondary" class="w-fit text-xs">
-                      Admin
-                    </Badge>
-                  </div>
-                </div>
-
-                <nav class="flex flex-col gap-2">
-                  <RouterLink
-                    to="/"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors duration-200"
-                  >
-                    <Wallet class="w-4 h-4" />
-                    My Wallet
-                  </RouterLink>
-                  <RouterLink
-                    to="/transfer"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors duration-200"
-                  >
-                    <Send class="w-4 h-4" />
-                    Transfer Money
-                  </RouterLink>
-                </nav>
-
-                <div class="pt-4 border-t">
-                  <Button
-                    v-if="isAuthenticated"
-                    @click="logout"
-                    variant="outline"
-                    class="w-full justify-start gap-2"
-                  >
-                    <LogOut class="w-4 h-4" />
+        <!-- Right Section: User Menu & Mobile Menu -->
+        <div class="flex items-center gap-3">
+          <!-- Desktop User Menu -->
+          <div class="hidden lg:flex items-center gap-3">
+            <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+              <DropdownMenu v-if="isAuthenticated">
+                <DropdownMenuTrigger as-child>
+                  <Button variant="ghost" class="relative h-9 px-3 rounded-lg hover:bg-slate-100 transition-colors duration-200 group">
+                    <div class="flex items-center gap-3">
+                      <Avatar class="w-8 h-8">
+                        <AvatarFallback class="text-black text-xl">
+                          {{ getUserInitials }}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div class="flex flex-col items-start">
+                        <Badge variant="secondary" class="text-xs h-5">
+                          Admin
+                        </Badge>
+                      </div>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent class="w-56" align="end">
+                  <DropdownMenuLabel class="flex flex-col">
+                    <span class="text-sm font-medium">{{ getAuthUser?.name }}</span>
+                    <span class="text-xs text-slate-500 font-normal">Administrator</span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem @click="logout" class="text-red-600 cursor-pointer">
+                    <LogOut class="w-4 h-4 mr-2" />
                     Logout
-                  </Button>
-                  <Button
-                    v-else
-                    @click="gotoLoginPage"
-                    class="w-full justify-start gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    <User class="w-4 h-4" />
-                    Login
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-        <!-- Desktop User Menu -->
-        <div class="hidden lg:flex items-center gap-3">
-          <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <DropdownMenu v-if="isAuthenticated">
-              <DropdownMenuTrigger as-child>
-                <Button variant="ghost" class="relative h-9 px-3 rounded-lg hover:bg-slate-100 transition-colors duration-200 group">
-                  <div class="flex items-center gap-3">
-                    <Avatar class="w-8 h-8">
-                      <AvatarFallback class="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-sm group-hover:scale-110 transition-transform duration-200">
+              <Button
+                v-else
+                @click="gotoLoginPage"
+                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <User class="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            </div>
+          </div>
+
+          <!-- Mobile Menu -->
+          <div class="flex lg:hidden">
+            <Sheet>
+              <SheetTrigger as-child>
+                <Button variant="ghost" size="sm" class="h-9 w-9 p-0">
+                  <Menu class="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" class="w-[280px] sm:w-[350px]">
+                <div class="flex flex-col gap-6 mt-8">
+                  <div class="flex items-center gap-3 pb-4 border-b">
+                    <Avatar class="w-10 h-10">
+                      <AvatarFallback
+                        v-if="isAuthenticated"
+                        class="text-black text-xl"
+                      >
                         {{ getUserInitials }}
                       </AvatarFallback>
+                      <AvatarFallback v-else class="bg-slate-100">
+                        <User class="w-4 h-4" />
+                      </AvatarFallback>
                     </Avatar>
-                    <div class="flex flex-col items-start">
-                      <Badge variant="secondary" class="text-xs h-5">
+                    <div class="flex flex-col">
+                      <Badge v-if="isAuthenticated" variant="secondary" class="w-fit text-xs">
                         Admin
                       </Badge>
                     </div>
                   </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent class="w-56" align="end">
-                <DropdownMenuLabel class="flex flex-col">
-                  <span class="text-sm font-medium">{{ getUserData?.name }}</span>
-                  <span class="text-xs text-slate-500 font-normal">Administrator</span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem @click="logout" class="text-red-600 cursor-pointer">
-                  <LogOut class="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            <Button
-              v-else
-              @click="gotoLoginPage"
-              class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
-            >
-              <User class="w-4 h-4 mr-2" />
-              Login
-            </Button>
+                  <nav class="flex flex-col gap-2">
+                    <RouterLink
+                      to="/"
+                      class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors duration-200"
+                    >
+                      <Wallet class="w-4 h-4" />
+                      My Wallet
+                    </RouterLink>
+                    <RouterLink
+                      to="/transfer"
+                      class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors duration-200"
+                    >
+                      <Send class="w-4 h-4" />
+                      Transfer Money
+                    </RouterLink>
+                  </nav>
+
+                  <div class="pt-4 border-t">
+                    <Button
+                      v-if="isAuthenticated"
+                      @click="logout"
+                      variant="outline"
+                      class="w-full justify-start gap-2"
+                    >
+                      <LogOut class="w-4 h-4" />
+                      Logout
+                    </Button>
+                    <Button
+                      v-else
+                      @click="gotoLoginPage"
+                      class="w-full justify-start gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      <User class="w-4 h-4" />
+                      Login
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>

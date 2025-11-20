@@ -113,8 +113,8 @@ const features = [
   },
   {
     icon: SparklesIcon,
-    title: 'Zero Fees',
-    description: 'No hidden charges'
+    title: '1.5% Fees',
+    description: 'No more hidden charges'
   }
 ]
 </script>
@@ -268,7 +268,7 @@ const features = [
                       <div class="relative group">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
                         <div class="relative">
-                          <DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 transition-colors duration-300 group-focus-within:text-blue-600"/>
+                          <DollarSign class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 z-10 transition-colors duration-300 group-focus-within:text-blue-600"/>
                           <Input
                             type="number"
                             step="0.01"
