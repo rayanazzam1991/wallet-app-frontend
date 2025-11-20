@@ -30,10 +30,9 @@ export const useAuthStore = defineStore('authStore', ()=>{
     if(response.data){
       setUser(response.data)
     }
-    }finally {
+    } finally {
       loading.value = false
     }
-
   }
   async function fetchUserData(){
     const response = await api.get<ApiResponse<User>>('/auth/me')
@@ -51,6 +50,12 @@ export const useAuthStore = defineStore('authStore', ()=>{
   const getAuthUser = computed(() => authUser.value)
   const getUserData = computed(() => userData.value)
   const isAuthenticated = computed(() => !!authUser.value?.token)
+  const getUserBalance = computed(() =>  userData.value?.balance)
+
+  const getUserInitials = computed(() => {
+    if (!authUser.value?.name) return 'U'
+    return authUser.value.name.charAt(0).toUpperCase()
+  })
 
   async function logout() {
     authUser.value = null
@@ -65,6 +70,8 @@ export const useAuthStore = defineStore('authStore', ()=>{
     setUser,
     fetchUserData,
     getAuthUser,
-    getUserData
+    getUserData,
+    getUserInitials,
+    getUserBalance
   }
 })
