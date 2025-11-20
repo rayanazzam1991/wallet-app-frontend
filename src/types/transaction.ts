@@ -21,3 +21,8 @@ export interface TransferMoney {
   receiver_id:number,
   amount:number,
 }
+
+export interface TransferMoneyStart {
+  status : string,
+  request_id:string
+}

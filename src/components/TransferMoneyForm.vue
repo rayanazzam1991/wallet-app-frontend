@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { z } from 'zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,8 @@ import {
   SparklesIcon,
   ArrowRightIcon,
   CheckCircleIcon,
-  Loader2Icon
+  Loader2Icon,
+  ClockIcon
 } from 'lucide-vue-next'
 import { useUserStore } from '@/stores/userStore.js'
 import { storeToRefs } from 'pinia'
@@ -37,12 +38,15 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { toast } from 'vue-sonner'
 import type { TransferMoney } from '@/types/transaction.ts'
 import { useTransactionStore } from '@/stores/transactionStore.ts'
+import { useMoneyTransferChannel } from '@/composable/useMoneyTransferChannel.ts'
 
 const transactionStore = useTransactionStore()
+const { getIsTransferPending, getIsTransferSuccess } = storeToRefs(transactionStore)
 const userStore = useUserStore()
 const { getReceivers } = storeToRefs(userStore)
 const isSubmitting = ref(false)
-const transferComplete = ref(false)
+
+useMoneyTransferChannel()
 
 onMounted(async () => {
   await userStore.fetchReceivers()
@@ -66,6 +70,26 @@ const { handleSubmit, resetForm } = useForm({
   validationSchema: toTypedSchema(transferSchema)
 })
 
+// Watch for success status and handle form reset
+watch(getIsTransferSuccess, (newValue) => {
+  console.log("newValue",newValue)
+  if (newValue) {
+    toast.success('Transfer Successful!', {
+      description: `Your money has been sent successfully.`,
+      style: {
+        background: '#10b981',
+        color: 'white'
+      }
+    })
+
+    // Reset form after showing success for 3 seconds
+    setTimeout(() => {
+      resetForm()
+      transactionStore.resetTransactionStatus()
+    }, 3000)
+  }
+})
+
 const submit = handleSubmit(async (values) => {
   isSubmitting.value = true
   form.receiver_id = Number(values.receiverId)
@@ -73,20 +97,7 @@ const submit = handleSubmit(async (values) => {
 
   try {
     await transactionStore.transferMoney(form)
-    transferComplete.value = true
-    toast.success('Transfer Successful!', {
-      description: `$${form.amount} has been sent successfully.`,
-      style: {
-        background: '#10b981',
-        color: 'white'
-      }
-    })
-
-    // Reset form after success
-    setTimeout(() => {
-      resetForm()
-      transferComplete.value = false
-    }, 2000)
+    // Don't show success here - wait for real-time update
   } catch (error: any) {
     toast.error('Transfer Failed', {
       description: error.message,
@@ -95,6 +106,8 @@ const submit = handleSubmit(async (values) => {
         color: 'white'
       }
     })
+    // Reset status on error
+    transactionStore.resetTransactionStatus()
   } finally {
     isSubmitting.value = false
   }
@@ -192,13 +205,31 @@ const features = [
           <Card class="w-full max-w-md border-0 shadow-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl hover-lift transition-all duration-500 overflow-hidden">
             <!-- Success State Overlay -->
             <div
-              v-if="transferComplete"
+              v-if="getIsTransferSuccess"
               class="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center z-20 transition-all duration-500"
             >
               <div class="text-center text-white p-8">
                 <CheckCircleIcon class="w-16 h-16 mx-auto mb-4 animate-bounce" />
                 <h3 class="text-2xl font-bold mb-2">Transfer Complete!</h3>
                 <p class="text-green-100">Your money has been sent successfully.</p>
+              </div>
+            </div>
+
+            <!-- Pending State Overlay -->
+            <div
+              v-if="getIsTransferPending && !getIsTransferSuccess"
+              class="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center z-20 transition-all duration-500"
+            >
+              <div class="text-center text-white p-8">
+                <div class="relative">
+                  <ClockIcon class="w-16 h-16 mx-auto mb-4 animate-pulse" />
+                  <Loader2Icon class="w-6 h-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Processing Transfer</h3>
+                <p class="text-amber-100">Please wait while we process your transaction...</p>
+                <div class="mt-4 w-24 h-1 bg-amber-200/30 rounded-full mx-auto overflow-hidden">
+                  <div class="h-full bg-amber-200 rounded-full animate-pulse" style="animation-duration: 2s"></div>
+                </div>
               </div>
             </div>
 
@@ -227,7 +258,7 @@ const features = [
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
                         <div class="relative">
                           <UserIcon class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400 z-10 transition-colors duration-300 group-focus-within:text-blue-600"/>
-                          <Select v-bind="componentField">
+                          <Select v-bind="componentField" :disabled="getIsTransferPending || getIsTransferSuccess">
                             <SelectTrigger
                               class="w-full pl-10 pr-4 py-6 border-2 border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:ring-0 focus:bg-white dark:focus:bg-slate-600 rounded-xl"
                             >
@@ -274,6 +305,7 @@ const features = [
                             step="0.01"
                             v-bind="componentField"
                             placeholder="0.00"
+                            :disabled="getIsTransferPending || getIsTransferSuccess"
                             class="pl-10 pr-4 py-6 border-2 border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm transition-all duration-300 focus:border-blue-500 focus:ring-0 focus:bg-white dark:focus:bg-slate-600 rounded-xl text-lg font-semibold"
                           />
                         </div>
@@ -286,7 +318,7 @@ const features = [
                 <!-- Submit Button -->
                 <Button
                   type="submit"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || getIsTransferPending || getIsTransferSuccess"
                   class="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl py-6 text-white font-semibold text-lg transition-all duration-500 transform hover:scale-[1.02] hover:shadow-2xl border-0 mt-2"
                 >
                   <!-- Animated background -->
@@ -294,7 +326,7 @@ const features = [
 
                   <div class="relative flex items-center justify-center space-x-3">
                     <Loader2Icon
-                      v-if="isSubmitting"
+                      v-if="isSubmitting || getIsTransferPending"
                       class="w-5 h-5 animate-spin"
                     />
                     <SendIcon
@@ -302,10 +334,10 @@ const features = [
                       class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
                     />
                     <span class="font-semibold">
-                      {{ isSubmitting ? 'Processing...' : 'Send Money' }}
+                      {{ getIsTransferPending ? 'Processing...' : isSubmitting ? 'Sending...' : 'Send Money' }}
                     </span>
                     <ArrowRightIcon
-                      v-if="!isSubmitting"
+                      v-if="!isSubmitting && !getIsTransferPending && !getIsTransferSuccess"
                       class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1 opacity-0 group-hover:opacity-100"
                     />
                   </div>

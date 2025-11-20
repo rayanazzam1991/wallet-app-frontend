@@ -19,8 +19,11 @@ export function useMoneyTransferChannel() {
     const channel = echo.private(`user.${userId}`);
 
     // Note the dot "." before the event name because of broadcastAs()
-    channel.listen('.money.transfer.success', async (e: never) => {
+    channel.listen('.money.transfer.success', async (e: any) => {
       await authStore.fetchUserData()
+      console.log([e.request_id,e.status])
+      await transactionStore.updateTransactionStatus(e.request_id,e.status)
+      console.log("e",e)
       if (typeof transactionStore.getPagination?.page !== 'undefined') {
         await transactionStore.fetchTransactions(transactionStore.getPagination.page)
       } else {
