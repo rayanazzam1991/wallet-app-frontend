@@ -83,7 +83,7 @@ const stats = computed(() => [
       <div class="absolute -bottom-40 -left-32 w-80 h-80 bg-cyan-200/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000"></div>
     </div>
 
-    <div class="relative z-10 max-w-full px-20 mx-auto">
+    <div class="relative z-10 max-w-full lg:px-20 mx-auto">
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
@@ -162,7 +162,8 @@ const stats = computed(() => [
                         class="font-semibold"
                         :class="t.type === 'Sent' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'"
                       >
-                        {{ t.type === 'Sent' ? '-' : '+' }}{{ currencyFormat(t.amount) }} <span class="text-xs">({{t.fees}})</span>
+                        {{ t.type === 'Sent' ? '-' : '+' }}{{ currencyFormat(t.amount) }}
+                        <span v-if="t.type === 'Sent'" class="text-xs">({{t.fees}})</span>
                       </p>
                       <Badge
                         variant="secondary"
